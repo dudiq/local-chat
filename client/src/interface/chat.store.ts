@@ -1,5 +1,6 @@
 import {proxy, useSnapshot} from 'valtio'
-import {ChatMessageValueObject} from "../core/chat";
+import {ChatMessageValueObject} from "../core/chat-message.value-object";
+import {ConnectionStateValueObject} from "../core/connection-state.value-object";
 
 export const chatStore = proxy<{
   typingTimeout?: number
@@ -13,6 +14,7 @@ export const chatStore = proxy<{
   input: string,
   messages: ChatMessageValueObject[],
   password: string // E2E encryption password
+  connectionState: ConnectionStateValueObject
 }>({
   typingTimeout: undefined,
   fileName: undefined,
@@ -25,6 +27,7 @@ export const chatStore = proxy<{
   input: '',
   messages: [],
   password: '',
+  connectionState: 'disconnected',
 })
 
 export function useChatStore() {
