@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  app:
+    # Build image from current directory
+    build: .
+    # Container name for convenience
+    container_name: bun-chat-simple
+    # Port mapping (Left - host port, Right - container port)
+    ports:
+      - "3000:3000"
+    # Auto restart if app crashes or server reboots
+    restart: unless-stopped
+    # Resource limits (optional, useful for self-hosted on low-end VPS)
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: '0.5'
+    #       memory: 256M

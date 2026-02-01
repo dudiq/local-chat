@@ -1,0 +1,11 @@
+.env.*.local
+.husky
+deploy
+ansible
+.turbo
+.vscode
+.idea
+.github
+Dockerfiles
+docs
+node_modules
