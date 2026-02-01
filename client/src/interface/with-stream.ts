@@ -1,17 +1,40 @@
 import {ChatMessageValueObject} from "../core/chat";
 import {chatStore} from "./chat.store";
+import {decrypt} from "./crypto";
 
-export function withStream({room, user}: {room: string, user: string}){
+async function decryptMessage(data: ChatMessageValueObject): Promise<ChatMessageValueObject> {
+  if (!chatStore.password) return data;
+
+  try {
+    const decrypted = {...data};
+    if (data.text) {
+      decrypted.text = await decrypt(data.text, chatStore.password);
+    }
+    if (data.file) {
+      decrypted.file = {
+        name: await decrypt(data.file.name, chatStore.password),
+        data: await decrypt(data.file.data, chatStore.password)
+      };
+    }
+    return decrypted;
+  } catch {
+    // Decryption failed - message might be unencrypted or wrong password
+    return {...data, text: data.text ? '[encrypted or wrong password]' : data.text};
+  }
+}
+
+export function withStream({room, user}: { room: string, user: string }) {
   const es = new EventSource(`/api/sse?room=${room}&user=${encodeURIComponent(user)}`);
 
-  es.onmessage = (event) => {
+  es.onmessage = async (event) => {
     const data: ChatMessageValueObject = JSON.parse(event.data);
 
     if (data.type === 'connected' && data.userUuid) {
       // Store userUuid received from server
       chatStore.userUuid = data.userUuid;
     } else if (data.type === 'chat') {
-      chatStore.messages.push(data)
+      const decrypted = await decryptMessage(data);
+      chatStore.messages.push(decrypted)
       // If user sent a message, they stopped typing
       if (data.user) {
         const next = {...chatStore.typingUsers};

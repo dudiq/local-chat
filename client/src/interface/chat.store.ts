@@ -11,7 +11,8 @@ export const chatStore = proxy<{
   userUuid: string,
   users: string[],
   input: string,
-  messages: ChatMessageValueObject[]
+  messages: ChatMessageValueObject[],
+  password: string // E2E encryption password
 }>({
   typingTimeout: undefined,
   fileName: undefined,
@@ -23,6 +24,7 @@ export const chatStore = proxy<{
   users: [],
   input: '',
   messages: [],
+  password: '',
 })
 
 export function useChatStore() {

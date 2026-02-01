@@ -22,6 +22,17 @@ Ever needed to quickly send a link from your phone to your computer? Or share a 
 - File sharing (images)
 - Light/dark theme
 - Auto-generated usernames based on device
+- **End-to-end encryption** (optional)
+
+## Security
+
+Local Chat supports optional end-to-end encryption. When you enter a password while joining a room, all messages and files are encrypted in your browser before being sent. Only devices with the same password can decrypt the content.
+
+- **Encryption**: AES-256-GCM
+- **Key derivation**: PBKDF2 with 100,000 iterations
+- **How it works**: Password is never sent to server. Messages are encrypted client-side and transmitted as encrypted blobs. Even if someone intercepts the traffic, they can't read the content without the password.
+
+> **Tip**: Share the room name and password with your devices through a secure channel (e.g., type it manually). If you don't need encryption on a trusted local network, simply leave the password field empty.
 
 ## Tech Stack
 

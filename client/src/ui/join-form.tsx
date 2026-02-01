@@ -3,12 +3,13 @@ import {toggleTheme, useTheme, initTheme} from "../interface/theme.store";
 import {generateDeviceName} from "../interface/get-device-name";
 
 type JoinFormProps = {
-  onJoin: ({room, user}: { room: string, user: string }) => void;
+  onJoin: ({room, user, password}: { room: string, user: string, password: string }) => void;
 };
 
 export const JoinForm = ({onJoin}: JoinFormProps) => {
   const [user, setUser] = useState(generateDeviceName)
   const [room, setRoom] = useState('')
+  const [password, setPassword] = useState('')
   const {theme} = useTheme()
 
   useEffect(() => {
@@ -18,7 +19,7 @@ export const JoinForm = ({onJoin}: JoinFormProps) => {
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!room || !user) return
-    onJoin({room, user})
+    onJoin({room, user, password})
   }
 
   return (
@@ -56,6 +57,16 @@ export const JoinForm = ({onJoin}: JoinFormProps) => {
                 value={user}
                 onChange={e => setUser(e.target.value)}
                 placeholder="enter your name"
+              />
+            </div>
+            <div className="join-field">
+              <label className="join-label">password <span className="join-hint">(optional, for E2E encryption)</span></label>
+              <input
+                className="join-input"
+                type="password"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                placeholder="encryption password"
               />
             </div>
           </div>
