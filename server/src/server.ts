@@ -3,12 +3,15 @@ import {
   handleEnsureRoom,
   handleAddUser,
   handleDisconnect,
-  handleRemoveController, getRoomUsers
+  getRoomUsers
 } from './controller'
 
-import {rooms, userSessions} from './store'
+import {rooms, userSessions, LIMITS} from './store'
+import {cleanupRooms} from "./cleanup-rooms";
 
 const generateUuid = () => crypto.randomUUID();
+
+cleanupRooms()
 
 const server = serve({
   port: 3000,
@@ -22,6 +25,19 @@ const server = serve({
       const user = url.searchParams.get("user");
       if (!roomId) return new Response("No room specified", {status: 400});
       if (!user) return new Response("No user specified", {status: 400});
+
+      // Check limits before creating connection
+      try {
+        const existingRoom = rooms.get(roomId);
+        if (!existingRoom && rooms.size >= LIMITS.MAX_ROOMS) {
+          return new Response("Maximum room limit reached", {status: 503});
+        }
+        if (existingRoom && existingRoom.controllers.size >= LIMITS.MAX_USERS_PER_ROOM) {
+          return new Response("Room is full", {status: 503});
+        }
+      } catch (e) {
+        return new Response("Service unavailable", {status: 503});
+      }
 
       const userUuid = generateUuid();
       let streamController: ReadableStreamDefaultController | null = null;
@@ -60,7 +76,7 @@ const server = serve({
                   client.enqueue(systemEventString);
                 }
               } catch (e) {
-                handleRemoveController(room, client);
+                handleDisconnect(roomId, client);
                 console.error("send-error", e);
               }
             }
@@ -92,6 +108,12 @@ const server = serve({
 
     // 2. POST Endpoint
     if (url.pathname === "/api/send" && req.method === "POST") {
+      // Check payload size limit
+      const contentLength = parseInt(req.headers.get('content-length') || '0');
+      if (contentLength > LIMITS.MAX_PAYLOAD_SIZE) {
+        return new Response("Payload too large", {status: 413});
+      }
+
       try {
         const body = await req.json();
         const {userUuid, text, file, type} = body; // file = { name, data: base64 }

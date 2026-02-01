@@ -1,4 +1,4 @@
-import {rooms, type RoomState, userSessions} from './store'
+import {rooms, type RoomState, userSessions, LIMITS} from './store'
 
 export function getRoomUsers(room: RoomState) {
   return Array.from(room.users.keys())
@@ -6,6 +6,9 @@ export function getRoomUsers(room: RoomState) {
 
 export function handleEnsureRoom(roomId: string) {
   if (!rooms.has(roomId)) {
+    if (rooms.size >= LIMITS.MAX_ROOMS) {
+      throw new Error("Maximum room limit reached");
+    }
     rooms.set(roomId, {
       controllers: new Set(),
       users: new Map(),
@@ -17,6 +20,9 @@ export function handleEnsureRoom(roomId: string) {
 }
 
 export function handleAddUser(room: RoomState, user: string, controller: ReadableStreamDefaultController, userUuid: string, roomId: string) {
+  if (room.controllers.size >= LIMITS.MAX_USERS_PER_ROOM) {
+    throw new Error("Room is full");
+  }
   room.controllers.add(controller);
   room.controllerUsers.set(controller, user);
   room.controllerUuids.set(controller, userUuid);
@@ -63,14 +69,23 @@ export function handleDisconnect(roomId: string, controller: ReadableStreamDefau
     const systemEvent = JSON.stringify({type: "system", text: `${removedInfo.user} disconnected`});
     const usersEventString = `data: ${usersEvent}\n\n`;
     const systemEventString = `data: ${systemEvent}\n\n`;
+    
+    // Collect failed controllers to clean up after iteration
+    const failedControllers: ReadableStreamDefaultController[] = [];
+    
     for (const client of room.controllers) {
       try {
         client.enqueue(usersEventString);
         client.enqueue(systemEventString);
       } catch (e) {
-        handleRemoveController(room, client);
+        failedControllers.push(client);
         console.error("send-error", e);
       }
+    }
+    
+    // Clean up failed controllers after iteration to avoid modifying Set during iteration
+    for (const failedClient of failedControllers) {
+      handleDisconnect(roomId, failedClient);
     }
   }
 }
