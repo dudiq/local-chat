@@ -1,13 +1,24 @@
 import {useState, useEffect} from "react";
 import {toggleTheme, useTheme, initTheme} from "../interface/theme.store";
 import {generateDeviceName} from "../interface/get-device-name";
+import {sessionStorage} from "../interface/session-storage";
 
 type JoinFormProps = {
   onJoin: ({room, user, password}: { room: string, user: string, password: string }) => void;
 };
 
+const session = sessionStorage<{ user: string }>('join-form')
+
+function initName() {
+  const user = session.get()?.user || generateDeviceName()
+  session.set({user})
+  return user
+}
+
+const defaultUser = initName()
+
 export const JoinForm = ({onJoin}: JoinFormProps) => {
-  const [user, setUser] = useState(generateDeviceName)
+  const [user, setUser] = useState(defaultUser)
   const [room, setRoom] = useState('')
   const [password, setPassword] = useState('')
   const {theme} = useTheme()
@@ -19,7 +30,13 @@ export const JoinForm = ({onJoin}: JoinFormProps) => {
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!room || !user) return
+    session.set({user})
     onJoin({room, user, password})
+  }
+
+  const onChangeUser = (value: string) => {
+    setUser(value)
+    session.set({user: value})
   }
 
   return (
@@ -55,12 +72,13 @@ export const JoinForm = ({onJoin}: JoinFormProps) => {
               <input
                 className="join-input"
                 value={user}
-                onChange={e => setUser(e.target.value)}
+                onChange={e => onChangeUser(e.target.value)}
                 placeholder="enter your name"
               />
             </div>
             <div className="join-field">
-              <label className="join-label">password <span className="join-hint">(optional, for E2E encryption)</span></label>
+              <label className="join-label">password <span
+                className="join-hint">(optional, for E2E encryption)</span></label>
               <input
                 className="join-input"
                 type="password"
