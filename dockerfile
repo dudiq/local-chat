@@ -1,25 +1,29 @@
 # Stage 1: Build React Frontend
-FROM node:20-alpine as builder
+FROM node:20-alpine AS builder
+ENV CI=true
+RUN corepack enable && corepack prepare pnpm@10.18.3 --activate
+
+# Copy client files first
+WORKDIR /app
+COPY client ./client
+
+# Install dependencies and build
 WORKDIR /app/client
-# Copy client configs
-COPY client/package.json client/package-lock.json* ./
-RUN npm install
-# Copy client source
-COPY client/ .
-RUN npm run build
+RUN pnpm install --frozen-lockfile
+RUN pnpm build
 
 # Stage 2: Run Bun Server
-FROM oven/bun:1
-WORKDIR /app
+FROM oven/bun:alpine AS runner
+WORKDIR /app/server
 
 # Copy server files
-COPY server ./server
+COPY server ./
 
-# Copy built frontend from first stage to public folder
-COPY --from=builder /app/client/../public ./public
+# Copy built frontend from builder stage
+COPY --from=builder /app/server/public ./public
 
 # Port
 EXPOSE 3000
 
 # Start
-CMD ["bun", "./server/src/index.ts"]
+CMD ["bun", "./src/index.ts"]

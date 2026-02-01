@@ -8,7 +8,7 @@ services:
     container_name: bun-chat-simple
     # Port mapping (Left - host port, Right - container port)
     ports:
-      - "3000:3000"
+      - "3001:3000"
     # Auto restart if app crashes or server reboots
     restart: unless-stopped
     # Resource limits (optional, useful for self-hosted on low-end VPS)

@@ -2,6 +2,8 @@
 
 Simple real-time chat application built with React and Bun. Users can join rooms and exchange messages instantly using Server-Sent Events (SSE).
 
+![two screens](example.png "Two screens")
+
 ## Features
 
 - Real-time messaging via SSE
