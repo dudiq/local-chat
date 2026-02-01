@@ -178,15 +178,15 @@ const server = serve({
       try {
         const body = await req.json();
         const {userUuid, text, file, type} = body; // file = { name, data: base64 }
-        
+
         // Lookup session by userUuid
         const session = userSessions.get(userUuid);
         if (!session) {
           return new Response("Invalid session", {status: 401});
         }
-        
+
         const {roomId, user} = session;
-        console.log('send', roomId, user, text, file);
+        console.log('send', roomId, user);
 
         if (rooms.has(roomId)) {
           const messageType = type ?? 'chat';
