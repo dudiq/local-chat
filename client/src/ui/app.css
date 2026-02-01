@@ -160,6 +160,25 @@ body {
   color: var(--text-dim);
 }
 
+/* ===== OWN MESSAGES (RIGHT ALIGNED) ===== */
+.message-own {
+  align-self: flex-end;
+  text-align: right;
+}
+
+.message-own .message-line {
+  flex-direction: row-reverse;
+}
+
+.message-own .message-attachment {
+  margin-left: 0;
+  margin-right: 20px;
+}
+
+.message-own .message-attachment img {
+  margin-left: auto;
+}
+
 .message-attachment {
   margin-top: 4px;
   margin-left: 20px;

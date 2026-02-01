@@ -3,6 +3,6 @@ export type ChatMessageValueObject = {
   user?: string;
   text?: string;
   file?: { name: string; data: string };
-  users?: string[];
+  users?: readonly string[] | string[];
   userUuid?: string;
 };

@@ -1,8 +1,32 @@
 import {useChatStore} from "../interface/chat.store";
 import {useEffect, useRef} from "react";
+import type {ChatMessageValueObject} from "../core/chat-message.value-object";
 
-export function ChatBody(){
-  const {messages} = useChatStore()
+function Message({message, isOwn}: { message: ChatMessageValueObject, isOwn: boolean }) {
+  if (message.type === 'system') {
+    return <div className="message-system">{message.text}</div>
+  }
+  return (
+    <>
+      <div className="message-line">
+        <span className="message-prompt">&gt;</span>
+        {!isOwn && <span className="message-user">{message.user}</span>}
+        <span className="message-text">{message.text}</span>
+      </div>
+      {message.file && (
+        <div className="message-attachment">
+          <a href={message.file.data} download={message.file.name}>[{message.file.name}]</a>
+          {message.file.data.startsWith('data:image') && (
+            <img src={message.file.data} alt={message.file.name}/>
+          )}
+        </div>
+      )}
+    </>
+  )
+}
+
+export function ChatBody() {
+  const {messages, user} = useChatStore()
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -13,29 +37,14 @@ export function ChatBody(){
   return (
     <div className="terminal-body">
       <div className="messages">
-        {messages.map((m, i) => (
-          <div key={i} className="message">
-            {m.type === 'system' ? (
-              <div className="message-system">{m.text}</div>
-            ) : (
-              <>
-                <div className="message-line">
-                  <span className="message-prompt">&gt;</span>
-                  <span className="message-user">{m.user}</span>
-                  <span className="message-text">{m.text}</span>
-                </div>
-                {m.file && (
-                  <div className="message-attachment">
-                    <a href={m.file.data} download={m.file.name}>[{m.file.name}]</a>
-                    {m.file.data.startsWith('data:image') && (
-                      <img src={m.file.data} alt={m.file.name}/>
-                    )}
-                  </div>
-                )}
-              </>
-            )}
-          </div>
-        ))}
+        {messages.map((m, i) => {
+          const isOwnMessage = m.user === user;
+          return (
+            <div key={i} className={`message ${isOwnMessage ? 'message-own' : ''}`}>
+              <Message message={m} isOwn={isOwnMessage}/>
+            </div>
+          );
+        })}
         <div ref={messagesEndRef}/>
       </div>
     </div>
