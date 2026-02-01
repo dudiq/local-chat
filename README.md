@@ -1,8 +1,18 @@
 # Local Chat
 
-Simple real-time chat application built with React and Bun. Users can join rooms and exchange messages instantly using Server-Sent Events (SSE).
+Simple real-time chat for your local network. Share text, links, and images between your devices instantly — phone to laptop, tablet to desktop, or any device with a browser.
 
 ![two screens](example.png "Two screens")
+
+## Why?
+
+Ever needed to quickly send a link from your phone to your computer? Or share a screenshot between devices without uploading to cloud services? Local Chat solves this by providing a lightweight, self-hosted chat that works entirely within your local network.
+
+**Use cases:**
+- Share links, code snippets, or notes between your devices
+- Transfer images without cloud uploads or cables
+- Quick copy-paste across different operating systems
+- No accounts, no internet required — just your local network
 
 ## Features
 
