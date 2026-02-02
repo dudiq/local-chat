@@ -45,11 +45,35 @@ Local Chat supports optional end-to-end encryption. When you enter a password wh
 
 ### Using Docker (Recommended)
 
+```yaml
+#docker-compose.yaml
+
+version: '3.8'
+
+services:
+  local-chat:
+    image: dudiq/local-chat:latest
+    container_name: local-chat
+    ports:
+      - "3008:3000"
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+```
+
 ```bash
 docker-compose up -d
 ```
 
-App will be available at `http://localhost:3000`
+App will be available at `http://localhost:3008`
 
 ### Manual Setup
 
