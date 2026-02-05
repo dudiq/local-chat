@@ -409,6 +409,10 @@ body {
   outline: none;
 }
 
+.join-input:disabled {
+  background: var(--border);
+}
+
 .join-input:focus {
   border-color: var(--accent);
 }

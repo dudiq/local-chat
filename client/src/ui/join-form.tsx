@@ -17,6 +17,9 @@ function initName() {
 
 const defaultUser = initName()
 
+const hasCrypto = typeof crypto !== 'undefined' && !!crypto.subtle
+const cryptoTitle = hasCrypto ? undefined : 'Sorry, E2E encryption supported only in secure contexts (HTTPS or localhost).'
+
 export const JoinForm = ({onJoin}: JoinFormProps) => {
   const [user, setUser] = useState(defaultUser)
   const [room, setRoom] = useState('')
@@ -77,12 +80,16 @@ export const JoinForm = ({onJoin}: JoinFormProps) => {
               />
             </div>
             <div className="join-field">
-              <label className="join-label">password <span
+              <label className="join-label"
+                     title={cryptoTitle}
+              >password <span
                 className="join-hint">(optional, for E2E encryption)</span></label>
               <input
+                title={cryptoTitle}
                 className="join-input"
                 type="password"
                 value={password}
+                disabled={!hasCrypto}
                 onChange={e => setPassword(e.target.value)}
                 placeholder="encryption password"
               />
