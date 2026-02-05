@@ -1,6 +1,6 @@
-import {handleExit} from "../interface/handle-exit";
-import {toggleTheme, useTheme} from "../interface/theme.store";
-import {useChatStore} from "../interface/chat.store";
+import {handleExit} from "../../interface/handle-exit";
+import {toggleTheme, useTheme} from "../../interface/theme.store";
+import {useChatStore} from "../../interface/chat.store";
 
 export function ChatHeader(){
   const {theme} = useTheme()

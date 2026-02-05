@@ -1,8 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
-
 :root {
   color-scheme: dark;
-  --font: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
+  --font: 'SF Mono', 'Fira Code', monospace;
   --bg: #0a0a0a;
   --surface: #111111;
   --border: #222222;

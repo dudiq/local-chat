@@ -1,6 +1,6 @@
-import {useChatStore} from "../interface/chat.store";
+import {useChatStore} from "../../interface/chat.store";
 import {useEffect, useRef} from "react";
-import type {ChatMessageValueObject} from "../core/chat-message.value-object";
+import type {ChatMessageValueObject} from "../../core/chat-message.value-object";
 
 function Message({message, isOwn}: { message: ChatMessageValueObject, isOwn: boolean }) {
   if (message.type === 'system') {

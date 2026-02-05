@@ -68,14 +68,3 @@ export async function decrypt(encryptedBase64: string, password: string): Promis
 
   return decoder.decode(plaintext)
 }
-
-// Check if text looks like encrypted content (base64 with expected length)
-export function isEncrypted(text: string): boolean {
-  try {
-    const decoded = atob(text)
-    // Minimum: 16 (salt) + 12 (iv) + 1 (data) = 29 bytes
-    return decoded.length >= 29
-  } catch {
-    return false
-  }
-}

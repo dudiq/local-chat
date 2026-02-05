@@ -1,7 +1,7 @@
 import {useChatStore} from "../interface/chat.store";
 import {JoinForm} from "./join-form";
 import {handleJoin} from "../interface/handle-join";
-import {ChatContainer} from "./chat-container";
+import {ChatContainer} from "./chat/chat-container";
 
 export function App() {
   const {joined} = useChatStore()

@@ -1,6 +1,6 @@
-import {useChatStore} from "../interface/chat.store";
+import {useChatStore} from "../../interface/chat.store";
 
-export function Typings() {
+export function TypingsIndicator() {
   const {typingUsers} = useChatStore()
 
   const typingList = Object.keys(typingUsers)
