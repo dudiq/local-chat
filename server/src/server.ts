@@ -116,7 +116,7 @@ const server = serve({
 
       try {
         const body = await req.json();
-        const {userUuid, text, file, type} = body; // file = { name, data: base64 }
+        const {userUuid, text, file, type, isEncrypted} = body; // file = { name, data: base64 }
 
         // Lookup session by userUuid
         const session = userSessions.get(userUuid);
@@ -129,7 +129,10 @@ const server = serve({
 
         if (rooms.has(roomId)) {
           const messageType = type ?? 'chat';
-          const message = JSON.stringify({type: messageType, user, text, file});
+          const message = JSON.stringify({type: messageType, user, text, file,
+            timestamp: Date.now(),
+            isEncrypted,
+          });
           const eventString = `data: ${message}\n\n`;
 
           for (const controller of rooms.get(roomId)!.controllers) {

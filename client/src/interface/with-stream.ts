@@ -3,7 +3,12 @@ import {chatStore} from "./chat.store";
 import {decrypt} from "./crypto";
 
 async function decryptMessage(data: ChatMessageValueObject): Promise<ChatMessageValueObject> {
-  if (!chatStore.password) return data;
+  if (!data.isEncrypted) return data
+  if (!chatStore.password) return {
+    ...data,
+    text: data.text ? '[encrypted - no password set]' : data.text,
+    file: undefined
+  };
 
   try {
     const decrypted = {...data};
@@ -19,7 +24,10 @@ async function decryptMessage(data: ChatMessageValueObject): Promise<ChatMessage
     return decrypted;
   } catch {
     // Decryption failed - message might be unencrypted or wrong password
-    return {...data, text: data.text ? '[encrypted or wrong password]' : data.text};
+    return {...data,
+      text: data.text ? '[encrypted or wrong password]' : data.text,
+      file: undefined
+    };
   }
 }
 

@@ -1,6 +1,7 @@
 export async function sendData(userUuid: string, data: {
   type: 'chat'
   text: string,
+  isEncrypted: boolean,
   file?: { name: string, data: string }
 } | { type: 'typing' }) {
 
