@@ -1,6 +1,6 @@
-
 // Periodic cleanup of stale sessions and empty rooms (runs every 5 minutes)
-import {rooms, userSessions} from "./store";
+import {rooms} from "./rooms.store";
+import {userSessions} from "./user-sessions.store";
 
 const CLEANUP_INTERVAL = 5 * 60 * 1000;
 

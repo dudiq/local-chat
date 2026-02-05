@@ -1,37 +1,8 @@
-import {rooms, type RoomState, userSessions, LIMITS} from './store'
+import {rooms, RoomState} from "./rooms.store";
+import {getRoomUsers} from "./get-room-users";
+import {userSessions} from "./user-sessions.store";
 
-export function getRoomUsers(room: RoomState) {
-  return Array.from(room.users.keys())
-}
-
-export function handleEnsureRoom(roomId: string) {
-  if (!rooms.has(roomId)) {
-    if (rooms.size >= LIMITS.MAX_ROOMS) {
-      throw new Error("Maximum room limit reached");
-    }
-    rooms.set(roomId, {
-      controllers: new Set(),
-      users: new Map(),
-      controllerUsers: new Map(),
-      controllerUuids: new Map(),
-    });
-  }
-  return rooms.get(roomId)!;
-}
-
-export function handleAddUser(room: RoomState, user: string, controller: ReadableStreamDefaultController, userUuid: string, roomId: string) {
-  if (room.controllers.size >= LIMITS.MAX_USERS_PER_ROOM) {
-    throw new Error("Room is full");
-  }
-  room.controllers.add(controller);
-  room.controllerUsers.set(controller, user);
-  room.controllerUuids.set(controller, userUuid);
-  room.users.set(user, (room.users.get(user) ?? 0) + 1);
-  // Register session
-  userSessions.set(userUuid, {roomId, user});
-}
-
-export function handleRemoveController(room: RoomState, controller: ReadableStreamDefaultController) {
+function handleRemoveController(room: RoomState, controller: ReadableStreamDefaultController) {
   const user = room.controllerUsers.get(controller);
   const userUuid = room.controllerUuids.get(controller);
   room.controllers.delete(controller);
@@ -69,10 +40,10 @@ export function handleDisconnect(roomId: string, controller: ReadableStreamDefau
     const systemEvent = JSON.stringify({type: "system", text: `${removedInfo.user} disconnected`});
     const usersEventString = `data: ${usersEvent}\n\n`;
     const systemEventString = `data: ${systemEvent}\n\n`;
-    
+
     // Collect failed controllers to clean up after iteration
     const failedControllers: ReadableStreamDefaultController[] = [];
-    
+
     for (const client of room.controllers) {
       try {
         client.enqueue(usersEventString);
@@ -82,7 +53,7 @@ export function handleDisconnect(roomId: string, controller: ReadableStreamDefau
         console.error("send-error", e);
       }
     }
-    
+
     // Clean up failed controllers after iteration to avoid modifying Set during iteration
     for (const failedClient of failedControllers) {
       handleDisconnect(roomId, failedClient);
