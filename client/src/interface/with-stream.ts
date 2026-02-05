@@ -1,6 +1,6 @@
 import {ChatMessageValueObject} from "../core/chat-message.value-object";
 import {chatStore} from "./chat.store";
-import {decrypt} from "./crypto";
+import {buildMessageAad, decrypt} from "./crypto";
 
 async function decryptMessage(data: ChatMessageValueObject): Promise<ChatMessageValueObject> {
   if (!data.isEncrypted) return data
@@ -13,18 +13,39 @@ async function decryptMessage(data: ChatMessageValueObject): Promise<ChatMessage
   try {
     const decrypted = {...data};
     if (data.text) {
-      decrypted.text = await decrypt(data.text, chatStore.password);
+      decrypted.text = await decrypt(data.text, chatStore.password,
+        buildMessageAad({
+          room: chatStore.room,
+          user: data.user ?? '',
+          type: data.type,
+          part: 'text',
+        }),
+      );
     }
     if (data.file) {
       decrypted.file = {
-        name: await decrypt(data.file.name, chatStore.password),
-        data: await decrypt(data.file.data, chatStore.password)
+        name: await decrypt(data.file.name, chatStore.password,
+          buildMessageAad({
+            room: chatStore.room,
+            user: data.user ?? '',
+            type: data.type,
+            part: 'file-name',
+          }),
+        ),
+        data: await decrypt(data.file.data, chatStore.password, buildMessageAad({
+            room: chatStore.room,
+            user: data.user ?? '',
+            type: data.type,
+            part: 'file-data',
+          }),
+        )
       };
     }
     return decrypted;
   } catch {
     // Decryption failed - message might be unencrypted or wrong password
-    return {...data,
+    return {
+      ...data,
       text: data.text ? '[encrypted or wrong password]' : data.text,
       file: undefined
     };
