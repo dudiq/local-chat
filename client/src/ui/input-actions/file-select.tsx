@@ -2,10 +2,10 @@ import {FileInput} from "./file-input";
 import {useChatStore} from "../../interface/chat.store";
 
 type Props = {
-  onFile: (files: File[]) => void;
+  onSelect: (files: File[]) => void;
 }
 
-export function FileSelect({onFile}: Props) {
+export function FileSelect({onSelect}: Props) {
   const chatStoreSnapshot = useChatStore()
 
   const fileName = chatStoreSnapshot.fileName || ''
@@ -13,7 +13,7 @@ export function FileSelect({onFile}: Props) {
   return (
     <label className="file-label">
       <FileInput
-        onFile={onFile}
+        onSelect={onSelect}
       />
       {fileName
         ?
@@ -21,7 +21,7 @@ export function FileSelect({onFile}: Props) {
           [{fileName}]
           <button className="btn" onClick={(e) => {
             e.preventDefault();
-            onFile([])
+            onSelect([])
           }}>x</button>
         </div>
         : '[attach]'}

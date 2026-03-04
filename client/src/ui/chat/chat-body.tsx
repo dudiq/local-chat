@@ -1,6 +1,7 @@
 import {useChatStore} from "../../interface/chat.store";
 import {useEffect, useRef} from "react";
 import type {ChatMessageValueObject} from "../../core/chat-message.value-object";
+import {FileView} from "./file-view";
 
 function Message({message, isOwn}: { message: ChatMessageValueObject, isOwn: boolean }) {
   if (message.type === 'system') {
@@ -15,10 +16,10 @@ function Message({message, isOwn}: { message: ChatMessageValueObject, isOwn: boo
       </div>
       {message.file && (
         <div className="message-attachment">
-          <a href={message.file.data} download={message.file.name}>[{message.file.name}]</a>
-          {message.file.data.startsWith('data:image') && (
-            <img src={message.file.data} alt={message.file.name}/>
-          )}
+          {message.file.data.map((fileData, index) => {
+            const name = message.file?.name[index] || ''
+            return <FileView key={`${index}-${name}`} fileData={fileData} name={name}/>
+          })}
         </div>
       )}
     </>

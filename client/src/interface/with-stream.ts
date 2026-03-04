@@ -1,9 +1,16 @@
-import {ChatMessageValueObject} from "../core/chat-message.value-object";
+import {ChatMessageValueObject, IncomingChatMessageValueObject} from "../core/chat-message.value-object";
 import {chatStore} from "./chat.store";
 import {buildMessageAad, decrypt} from "./crypto";
 
-async function decryptMessage(data: ChatMessageValueObject): Promise<ChatMessageValueObject> {
-  if (!data.isEncrypted) return data
+async function decryptMessage(data: IncomingChatMessageValueObject): Promise<ChatMessageValueObject> {
+  if (!data.isEncrypted) return {
+    ...data,
+    file: data.file ? {
+      name: JSON.parse(data.file.name) as string[],
+      data: JSON.parse(data.file.data) as string[],
+    } : undefined
+  }
+
   if (!chatStore.password) return {
     ...data,
     text: data.text ? '[encrypted - no password set]' : data.text,
@@ -23,25 +30,32 @@ async function decryptMessage(data: ChatMessageValueObject): Promise<ChatMessage
       );
     }
     if (data.file) {
-      decrypted.file = {
-        name: await decrypt(data.file.name, chatStore.password,
-          buildMessageAad({
-            room: chatStore.room,
-            user: data.user ?? '',
-            type: data.type,
-            part: 'file-name',
-          }),
-        ),
-        data: await decrypt(data.file.data, chatStore.password, buildMessageAad({
-            room: chatStore.room,
-            user: data.user ?? '',
-            type: data.type,
-            part: 'file-data',
-          }),
-        )
+      const names = await decrypt(data.file.name, chatStore.password,
+        buildMessageAad({
+          room: chatStore.room,
+          user: data.user ?? '',
+          type: data.type,
+          part: 'file-name',
+        }))
+      const files = await decrypt(data.file.data, chatStore.password, buildMessageAad({
+          room: chatStore.room,
+          user: data.user ?? '',
+          type: data.type,
+          part: 'file-data',
+        }),
+      )
+      return {
+        ...decrypted,
+        file: {
+          name: JSON.parse(names) as string[],
+          data: JSON.parse(files) as string[],
+        }
       };
     }
-    return decrypted;
+    return {
+      ...decrypted,
+      file: undefined
+    };
   } catch {
     // Decryption failed - message might be unencrypted or wrong password
     return {
@@ -84,7 +98,7 @@ export function withStream({room, user}: { room: string, user: string }) {
         // Store userUuid received from server
         chatStore.userUuid = data.userUuid;
       } else if (data.type === 'chat') {
-        const decrypted = await decryptMessage(data);
+        const decrypted = await decryptMessage(data as IncomingChatMessageValueObject);
         chatStore.messages.push(decrypted)
         // If user sent a message, they stopped typing
         if (data.user) {

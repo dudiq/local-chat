@@ -14,27 +14,28 @@ import {CurrentUser} from "./current-user";
 export function ChatContainer() {
   const {input} = useChatStore()
 
-  const fileRef = useRef<File | undefined>(undefined)
+  const fileRef = useRef<File[] | undefined>(undefined)
 
-  const handleFileChange = useCallback((files: File[]) => {
-    const file = files[0];
-    fileRef.current = file;
-    chatStore.fileName = file?.name
+  const handleFilesSelect = useCallback((files: File[]) => {
+    fileRef.current = files;
+    const name = files.length > 1 ? `${files[0]?.name} + ${files.length - 1} more` : files[0]?.name
+    chatStore.fileName = name || ''
   }, [])
 
 
   const handleSend = useCallback(async () => {
-    const file = fileRef.current
+    const files = fileRef.current
     const input = chatStore.input
 
-    if (!input && !file) return;
+    if (!input && !files) return;
+    if (files?.length === 0) return;
 
     fileRef.current = undefined
     chatStore.fileName = ''
     chatStore.input = ''
 
     await handleSendData({
-      text: input, file,
+      text: input, files,
     })
   }, []);
 
@@ -61,14 +62,14 @@ export function ChatContainer() {
           <div className="input-actions">
             <button className="btn btn-primary" onClick={handleSend}>send</button>
             <FileSelect
-              onFile={handleFileChange}
+              onSelect={handleFilesSelect}
             />
           </div>
         </div>
       </div>
 
       <PasteProxy
-        onFile={handleFileChange}
+        onFile={handleFilesSelect}
       />
       <StreamProxy/>
     </>

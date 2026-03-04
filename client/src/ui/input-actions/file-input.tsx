@@ -1,16 +1,17 @@
 type Props = {
-  onFile: (files: File[]) => void;
+  onSelect: (files: File[]) => void;
 }
-export function FileInput({onFile}: Props){
+export function FileInput({onSelect}: Props){
   return (
     <input
       type="file"
       className="file-input"
+      multiple
       onChange={e => {
         if (!e.target.files) return
         const files = e.target.files
         if (!files) return;
-        onFile([...files])
+        onSelect([...files])
         e.target.value = ''
       }}
     />
